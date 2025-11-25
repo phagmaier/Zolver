@@ -445,6 +445,52 @@ pub fn parseFile(path: []const u8, allocator: std.mem.Allocator) !State {
     return parse(contents, allocator);
 }
 
+pub fn genExample() !void {
+    const config =
+        \\[game]
+        \\pta = p1
+        \\street = flop
+        \\prev_action = bet
+        \\bet = 3.5
+        \\stack1 = 97.5
+        \\stack2 = 100
+        \\pot = 7
+        \\bb = 1
+        \\
+        \\[board]
+        \\Ah Kd 7c
+        \\
+        \\[p1_range]
+        \\AKs QQ
+        \\
+        \\[p2_range]
+        \\AA KK
+    ;
+
+    var writeBuff: [4096]u8 = undefined;
+
+    const file = std.fs.cwd().createFile("exampleData.txt", .{}) catch |err| {
+        std.debug.print("Failed to create file\n", .{});
+        return err;
+    };
+    defer file.close();
+
+    var file_writer = file.writer(&writeBuff);
+    const writer = &file_writer.interface;
+    // Issue 2: use writeAll, not write (write may not write everything)
+    writer.writeAll(config) catch |err| {
+        std.debug.print("Failed to write content to example file\n", .{});
+        return err;
+    };
+    try writer.flush();
+
+    // Issue 3: realpath returns a slice, can't assign to array
+    //var cwd_buf: [400]u8 = undefined;
+    const cwd = std.fs.cwd().realpath(".", &writeBuff) catch ".";
+
+    std.debug.print("Wrote {s} to path {s}\n", .{ "exampleData.txt", cwd });
+}
+
 // ============================================================================
 // Tests
 // ============================================================================
@@ -523,4 +569,9 @@ test "parse full config" {
     try std.testing.expectEqual(@as(usize, 3), state.board.items.len);
     try std.testing.expectEqual(@as(usize, 10), state.p1_range.items.len); // 4 AKs + 6 QQ
     try std.testing.expectEqual(@as(usize, 12), state.p2_range.items.len); // 6 AA + 6 KK
+    state.print();
+}
+
+test "generate example" {
+    try genExample();
 }

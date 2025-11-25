@@ -75,7 +75,7 @@ pub const GameState = struct {
         return new;
     }
 
-    pub fn getBetGameState(self: *GameState, pct_pot: f32) ?GameState {
+    pub fn getBetGameState(self: *GameState, pct_pot: f32, bb: f32) ?GameState {
         // 1. Check Max Bets rule
         if (self.numbets >= MAXNUMBETS or self.action == .ALLIN) return null;
 
@@ -93,7 +93,7 @@ pub const GameState = struct {
         // 3. STRICT CHECK: Effective Stack
         // If this bet requires more chips than I have... OR more chips than Opponent has:
         // Then it is effectively an All-in. Return null here and let getAllInGameState handle it.
-        if (chips_to_add >= my_stack or chips_to_add >= opp_stack) return null;
+        if (chips_to_add >= my_stack or chips_to_add >= opp_stack or chips_to_add < bb) return null;
 
         var new = self.*;
         new.isp1 = !self.isp1;
