@@ -1,5 +1,4 @@
 const std = @import("std");
-
 pub const Card = u32;
 
 pub const SPADE: u32 = 0b0001;
@@ -104,3 +103,4 @@ pub fn get_card_str(card: u32) ![2]u8 {
     };
     return str;
 }
+
