@@ -4,6 +4,8 @@ const Arena = std.heap.ArenaAllocator;
 const GameStateModule = @import("gamestate.zig");
 const GameState = GameStateModule.GameState;
 const Action = GameStateModule.Action;
+const Parser = @import("parser.zig");
+const Hand = Parser.Hand;
 const BETSIZES = GameStateModule.BETSIZES;
 
 pub const Edge = struct {
@@ -85,25 +87,29 @@ pub fn buildTree(state: *GameState, arr: *std.ArrayList(Edge), arena: Allocator,
     try arr.append(temp_allocator, edge);
 }
 
-fn count_and_check(arr: *std.ArrayList(Edge), maxPotSize: f32) void {
+fn count_and_check(arr: *std.ArrayList(Edge)) void {
     var count: usize = 0;
     for (arr.items) |*edge| {
-        count += _count_and_check(edge, maxPotSize);
+        count += _count_and_check(edge);
     }
     std.debug.print("COUNT: {d}\n", .{count});
 }
 
-fn _count_and_check(edge: *Edge, maxPotSize: f32) usize {
+//Move this into testng make it as a struct and just make this a function
+//cause it shouldn't be here since you only need it for testing
+fn _count_and_check(edge: *Edge) usize {
     var count: usize = 1;
-    std.debug.assert(edge.amount <= maxPotSize);
 
     if (edge.child) |child| {
         for (child.edges) |*children| {
-            count += _count_and_check(children, maxPotSize);
+            count += _count_and_check(children);
         }
     }
     return count;
 }
+
+//You are here working on this
+pub fn start(state: *GameState, hands1: []Hand, hands2: []Hand, bb: f32) !void {}
 
 test "Init count and confirm sizes" {
     var da = std.heap.DebugAllocator(.{}){};
