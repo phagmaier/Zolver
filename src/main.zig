@@ -101,8 +101,6 @@ pub fn main() !void {
     defer arena.deinit();
     const arena_allocator = arena.allocator();
 
-    std.debug.print("Initializing Tree...\n", .{});
-
     // --- usage of parse_to_start ---
     const parsed_data = try parse_to_start("../Data/exampleData.txt", temp_allocator);
 
@@ -110,22 +108,13 @@ pub fn main() !void {
     defer temp_allocator.free(parsed_data.h1);
     defer temp_allocator.free(parsed_data.h2);
 
-    var root_state = parsed_data.state;
+    var start_state = parsed_data.state;
     const bb = parsed_data.bb;
     const h1 = parsed_data.h1;
     const h2 = parsed_data.h2;
 
-    std.debug.print("Parsed State: Street={any}, Pot={d}, BB={d}\n", .{ root_state.street, root_state.pot, bb });
-    std.debug.print("Hands: P1={d}, P2={d}\n", .{ h1.len, h2.len });
-
     var root_list = std.ArrayListUnmanaged(Edge){};
     defer root_list.deinit(temp_allocator);
 
-    // Since you don't need this just make a function in Node called start and pass all this data
-    try NodeModule.buildTree(&root_state, &root_list, arena_allocator, temp_allocator, @intCast(h1.len), @intCast(h2.len), bb);
-
-    if (root_list.items.len == 0) {
-        std.debug.print("Error: Tree is empty!\n", .{});
-        return;
-    }
+    try NodeModule.start(&start_state, h1, h2, bb, arena_allocator, temp_allocator);
 }
